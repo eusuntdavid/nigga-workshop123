@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Epic Fun Website</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: 'Arial', sans-serif;
+        }
+        /* Animație de fundal */
+        .background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://source.unsplash.com/1600x900/?nature,landscape') center center no-repeat;
+            background-size: cover;
+            animation: backgroundAnimation 15s infinite alternate;
+        }
+
+        @keyframes backgroundAnimation {
+            0% { opacity: 0.8; transform: scale(1.1); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        /* Form login */
+        .login-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.7);
+            padding: 40px;
+            border-radius: 10px;
+            color: white;
+            text-align: center;
+            width: 300px;
+        }
+
+        .login-container h2 {
+            margin-bottom: 20px;
+            font-size: 24px;
+            color: #ff7f50;
+        }
+
+        .login-container input {
+            width: 80%;
+            padding: 12px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            outline: none;
+            background: #333;
+            color: white;
+        }
+
+        .login-container button {
+            width: 85%;
+            padding: 12px;
+            background-color: #ff7f50;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .login-container button:hover {
+            background-color: #ff4500;
+        }
+
+        /* Confetti Animation */
+        .confetti {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 999;
+        }
+
+        .confetti div {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #ff0;
+            animation: fall 3s linear infinite;
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateY(100vh) rotate(360deg);
+            }
+        }
+
+        /* Game Canvas */
+        #gameCanvas {
+            display: none;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="background"></div>
+
+    <div class="login-container" id="loginContainer">
+        <h2>Login</h2>
+        <input type="text" id="username" placeholder="Username" required>
+        <input type="password" id="password" placeholder="Password" required>
+        <button onclick="login()">Login</button>
+    </div>
+
+    <!-- Confetti -->
+    <div class="confetti" id="confetti"></div>
+
+    <!-- Game (3D Kart) -->
+    <div id="gameCanvas" style="display: none;">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+        <script>
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.getElementById('gameCanvas').appendChild(renderer.domElement);
+
+            // Kart
+            const kartGeometry = new THREE.BoxGeometry(1, 0.5, 2);
+            const kartMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+            const kart = new THREE.Mesh(kartGeometry, kartMaterial);
+            scene.add(kart);
+
+            // Track (simplu drum)
+            const trackGeometry = new THREE.PlaneGeometry(100, 100);
+            const trackMaterial = new THREE.MeshBasicMaterial({ color: 0x777777, side: THREE.DoubleSide });
+            const track = new THREE.Mesh(trackGeometry, trackMaterial);
+            track.rotation.x = - Math.PI / 2;
+            scene.add(track);
+
+            camera.position.z = 5;
+
+            // Lighting
+            const light = new THREE.AmbientLight(0xffffff);
+            scene.add(light);
+
+            // Key controls
+            let keys = {};
+            window.addEventListener('keydown', (e) => keys[e.key] = true);
+            window.addEventListener('keyup', (e) => keys[e.key] = false);
+
+            const kartSpeed = 0.1;
+
+            // Mișcarea kartului
+            function moveKart() {
+                if (keys['w']) kart.position.z -= kartSpeed;
+                if (keys['s']) kart.position.z += kartSpeed;
+                if (keys['a']) kart.position.x -= kartSpeed;
+                if (keys['d']) kart.position.x += kartSpeed;
+            }
+
+            // Animare
+            function animate() {
+                requestAnimationFrame(animate);
+                moveKart();
+                renderer.render(scene, camera);
+            }
+
+            animate();
+        </script>
+    </div>
+
+    <script>
+        let users = {
+            "eusuntdavid": "1234"
+        }; // Stocăm utilizatorii și parolele
+
+        function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            if (username === "eusuntdavid" && password === "1234") {
+                alert('Login successful!');
+                document.getElementById('loginContainer').style.display = 'none'; // Ascunde login-ul
+                document.getElementById('gameCanvas').style.display = 'block'; // Arată jocul
+                triggerConfetti(); // Confetti la logare
+            } else {
+                alert('Invalid username or password!');
+            }
+        }
+
+        // Confetti animation
+        function triggerConfetti() {
+            let confettiContainer = document.getElementById('confetti');
+            for (let i = 0; i < 100; i++) {
+                let confettiPiece = document.createElement('div');
+                confettiPiece.style.left = `${Math.random() * 100}vw`;
+                confettiPiece.style.animationDuration = `${Math.random() * 3 + 2}s`;
+                confettiPiece.style.animationDelay = `${Math.random() * 2}s`;
+                confettiPiece.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
+                confettiContainer.appendChild(confettiPiece);
+            }
+        }
+    </script>
+</body>
+</html>
